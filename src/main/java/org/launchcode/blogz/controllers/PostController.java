@@ -3,6 +3,7 @@ package org.launchcode.blogz.controllers;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.launchcode.blogz.models.Post;
 import org.launchcode.blogz.models.User;
@@ -25,13 +26,40 @@ public class PostController extends AbstractController {
 		
 		// TODO - implement newPost
 		
-		return "redirect:index"; // TODO - this redirect should go to the new post's page  		
+		//get request parameters
+		//validate parameters -- both body and title
+		//if valid, create new Post
+		//if not, send back to form with errors
+		
+		String title = request.getParameter("title");
+		String body = request.getParameter("body");
+		HttpSession thisSession = request.getSession();
+		User author = getUserFromSession(thisSession);
+		
+		if(body != null && title !=null){
+			Post newPost = new Post(title, body, author);
+			postDao.save(newPost);
+			return "redirect:index"; // TODO - this redirect should go to the new post's page
+		}
+		else
+		{
+			//add error
+			return "newpost"; 
+		}
 	}
 	
 	@RequestMapping(value = "/blog/{username}/{uid}", method = RequestMethod.GET)
 	public String singlePost(@PathVariable String username, @PathVariable int uid, Model model) {
 		
 		// TODO - implement singlePost
+		
+		// get given post
+		
+		//pass post into template
+		
+		Post singlePost = postDao.findByUid(uid);
+		model.addAttribute("post", singlePost);
+		
 		
 		return "post";
 	}
@@ -40,6 +68,18 @@ public class PostController extends AbstractController {
 	public String userPosts(@PathVariable String username, Model model) {
 		
 		// TODO - implement userPosts
+		
+		//get all of user posts
+		
+		//pass into template
+		User un = userDao.findByUsername(username);
+		//int authorID = un.getUid();
+		
+		List<Post> posts = un.getPosts();
+		
+		
+		
+		model.addAttribute("posts", posts);
 		
 		return "blog";
 	}
